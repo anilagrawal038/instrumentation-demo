@@ -8,6 +8,7 @@ import com.san.console.ConsoleOutputCapturer;
 public class ToolsConsoleService {
 
 	private final String CONSOLE_EXECUTER_CLASS_METHOD = "run";
+	private ClassGenerator generator = new ClassGenerator();
 
 	public String execute(String body, boolean isEnableStackTrace) {
 		ConsoleOutputCapturer outputCapturer = new ConsoleOutputCapturer();
@@ -35,7 +36,6 @@ public class ToolsConsoleService {
 	}
 
 	public void process(String body) throws Exception {
-		ClassGenerator generator = new ClassGenerator();
 		Class<?> clazz = generator.generateClass(body);
 		Object obj = clazz.newInstance();
 		clazz.getMethod(CONSOLE_EXECUTER_CLASS_METHOD).invoke(obj);

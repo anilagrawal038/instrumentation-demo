@@ -13,15 +13,16 @@ import com.san.console.ConsoleExecuter;
 public class ClassGenerator {
 
 	final String tmpDir = System.getProperty("java.io.tmpdir");
+	final String classPath = tmpDir + "/java/DummyClassGenerator";
 	final Class<?> clazz = ConsoleExecuter.class;
+	final File root = new File(classPath); // On Windows running on C:\, this is C:\java.
+	final File sourceFile = new File(root, clazz.getName().replace('.', '/') + ".java");
 
 	public Class<?> generateClass(String methodBody) throws IOException, ClassNotFoundException {
 		String sourceString = fileData(methodBody);
 		byte[] sourceBytes = sourceString.getBytes(StandardCharsets.UTF_8);
 
 		// Save source in .java file.
-		File root = new File(tmpDir + "/java/DummyClassGenerator"); // On Windows running on C:\, this is C:\java.
-		File sourceFile = new File(root, clazz.getName().replace('.', '/') + ".java");
 		sourceFile.getParentFile().mkdirs();
 		Files.write(sourceFile.toPath(), sourceBytes);
 
@@ -30,7 +31,8 @@ public class ClassGenerator {
 		compiler.run(null, null, null, sourceFile.getPath());
 
 		// Load and instantiate compiled class.
-		DemoClassLoader demoClassLoader = new DemoClassLoader(ClassGenerator.class.getClassLoader(), root.getAbsolutePath());
+		// We need to create new instance of class loader each time when we want to load the modified class
+		DemoClassLoader demoClassLoader = new DemoClassLoader(ClassGenerator.class.getClassLoader(), classPath);
 		Class<?> cls = Class.forName(clazz.getName(), true, demoClassLoader);
 		return cls;
 	}
